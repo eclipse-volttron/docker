@@ -30,6 +30,7 @@ agents:
     source: volttron-platform-driver
     libraries:
       - volttron-lib-fake-driver
+      - volttron-lib-base-driver
     # Config store entries are able to be programatically looked up
     # by a key.  In the following there are two entries
     # - fake.csv
