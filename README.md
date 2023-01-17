@@ -1,6 +1,6 @@
 # VOLTTRON Docker Image
 
-This is the readme for the VOLTTRON docker image.  The readme gives commands for starting a minimal volttron
+This is the readme for the VOLTTRON docker repository.  The readme gives commands for starting a minimal volttron
 environment (one without any agents) through to initializing the full environment using custom configuration and
 datavolumes.  The readme will also walk through how the docker image is meant to be run, the environmental variables
 available for changing behaviour and the assumptions that have been made in developing this image.
@@ -10,7 +10,9 @@ available for changing behaviour and the assumptions that have been made in deve
 The following requires docker to be available through the command line and sudo to be available for removing
 datavolumes.
 
-Note: it is assumed the commands below are executing in the ```docker``` directory of volttron-core repository.
+Clone this repository ```git clone https://github.com/eclipse-volttron/docker``` and ```cd docker```.
+
+It is assumed that you are executing from a shell within the docker directory for the rest of this README.
 
 
 ## Environmental Variables
@@ -23,6 +25,9 @@ value ```VAL```
 | ---------------------- | ------------------------------------------------------------------------------- |
 | PLATFORM_CONFIG        | Location of the platform configuration file to add agents during startup and    |
 |                        | setup the platform runtime.                                                     |
+|------------------------| --------------------------------------------------------------------------------|
+| REINITIALIZE           | If present the start up of the platform will always reinstall the platform and  | 
+|                        | agents.  If not present the content in the passed datavolume will be utilized.  |
 |------------------------| --------------------------------------------------------------------------------|
 
 ## Minimal Execution
@@ -88,7 +93,8 @@ docker run -d -v $PWD/example/config:/config \
     --name volttron --rm -it eclipsevolttron/volttron:v10
 ```
 
-Once executing the above command monitor the logs via ```docker logs volttron``` or through another monitoring tool such as docker desktop or podman.
+Once executing the above command monitor the logs via ```docker logs volttron``` or through another monitoring tool such as docker desktop or podman.  In addition
+the docker logs are located in ```/home/volttron/datavolume/volttron_home/volttron.log".
 
 
 ## Platform Config Structure
