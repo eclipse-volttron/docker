@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import shutil
 import sys
 import threading
 import time
@@ -100,20 +101,21 @@ class PlatformConfig:
 
 class VolttronThread(threading.Thread):
 
-    def __init__(self, verbosity: str = None, *args, **kwargs):
+    def __init__(self, verbosity: str = "-v", *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._verbosity = verbosity
 
     def run(self):
-        platform = subprocess.Popen(["volttron", self._verbosity],
+        myplatform = subprocess.Popen(["volttron", self._verbosity],
                                     text=True,
                                     stderr=subprocess.STDOUT,
                                     stdout=subprocess.PIPE)
         with Path(f"{os.environ['VOLTTRON_HOME']}/volttron.log").open("wt") as fp:
-            while platform.poll() is None:
-                line = platform.stdout.readline()
+            while myplatform.poll() is None:
+                line = myplatform.stdout.readline()
                 fp.write(line)
                 sys.stdout.write(line)
+                fp.flush()
                 time.sleep(0.00001)
 
 
@@ -129,11 +131,13 @@ if __name__ == "__main__":
     if not env_dir:
         raise ValueError("Invalid $VOLTTRON_VENV directory specified")
 
-    def get_path_from_home(path: str):
+    def get_path_from_home(path: str = ""):
         """Return a subpath from VOLTTRON_HOME"""
+        if not path:
+            return f"{volttron_home}"
         return f"{volttron_home}/{path}"
 
-    def exec(command: List[str]):
+    def exec(cmd: List[str]):
         """Execute a command using Popen and write out stdout and stderr to sys.stdout"""
 
         process = subprocess.Popen(cmd,
@@ -148,8 +152,8 @@ if __name__ == "__main__":
             sys.exit(process.returncode)
 
     def start_platform(verbosity="-vv") -> VolttronThread:
-        platform = VolttronThread(verbosity=verbosity, daemon=True)
-        platform.start()
+        my_platform = VolttronThread(verbosity=verbosity, daemon=True)
+        my_platform.start()
 
         while True:
             continue_loop = True
@@ -164,7 +168,7 @@ if __name__ == "__main__":
                     break
             except subprocess.CalledProcessError:
                 time.sleep(2)
-        return platform
+        return my_platform
 
     # Only create a new virtual env if we need it.
     if not Path(env_dir).joinpath("bin/python").exists():
@@ -175,19 +179,14 @@ if __name__ == "__main__":
     # Make sure our executable is the one in the virtual environment.
     sys.executable = Path(env_dir).joinpath("bin/python")
 
+    os.makedirs(get_path_from_home(), exist_ok=True)
+
     # Determine if we need to install volttron into the container.
     initialize_volttron = get_path_from_home("initialize_volttron")
-    initialized_file = get_path_from_home('initialized')
-
-    if reinit_platform:
-        if os.path.exists(initialized_file):
-            os.remove(initialized_file)
-        if os.path.exists(initialize_volttron):
-            os.remove(initialize_volttron)
-
+        
     if not Path(initialize_volttron).exists():
         sys.stdout.write("Installing volttron\n")
-        cmd = ["pip", "install", "volttron"]
+        cmd = ["pip", "install", "volttron", "--upgrade"]
         exec(cmd)
         Path(initialize_volttron).write_text("Initialized")
 
@@ -212,8 +211,6 @@ if __name__ == "__main__":
         for a in platform_config.agents:
             libs_needed.update(a.libraries)
 
-        platform = start_platform(platform_config.verbosity)
-
         if libs_needed:
             sys.stdout.write("Installing Libraries\n")
             sys.stdout.write("\n".join(libs_needed))
@@ -231,6 +228,9 @@ if __name__ == "__main__":
                 service_dict[s.service]['enabled'] = s.enabled
 
             yaml.safe_dump(service_dict, service_config_path.open('wt'))
+            
+        # start the platform to install agents
+        platform = start_platform(platform_config.verbosity)
 
         if platform_config.agents:
 
@@ -270,7 +270,7 @@ if __name__ == "__main__":
 
                         subprocess.check_call(config_store_cmd)
 
-            initialized_file.open("wt").write("Woot I have been initialized!")
+            initialized_file.open("wt").write("")
 
     # Keep running until someone shuts it down.
     platform.join()

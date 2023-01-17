@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eux
 
 if [ ! -d $VOLTTRON_HOME ]
 then
@@ -20,6 +20,18 @@ chown -R volttron:volttron $VOLTTRON_DATA_VOLUME
 # this needs to be set since we write to the home directory for instances.
 export HOME=/home/volttron
 cd /home/volttron
+
+REINITIALIZE="${REINITIALIZE:=0}"
+
+if [ $REINITIALIZE != 0 ]
+then
+    if [ -d "${VOLTTRON_HOME}" ]
+    then
+        echo "Reinitializing"
+        rm "${VOLTTRON_HOME}" -rf
+    fi
+fi
+
 
 if [ ! -f "$VOLTTRON_HOME/initialized" ]
 then

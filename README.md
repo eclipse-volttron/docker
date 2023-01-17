@@ -21,10 +21,10 @@ The following environmental variables are available within the docker image.  On
 ```docker exec -e "ENV=VAL" -u volttron ...``` where ```ENV``` is the environmental variable name with the 
 value ```VAL```
 
-| Environmental Variable | Notes                                                                           |
-| ---------------------- | ------------------------------------------------------------------------------- |
-| PLATFORM_CONFIG        | Location of the platform configuration file to add agents during startup and setup the platform runtime.|
-| REINITIALIZE           | If present the start up of the platform will always reinstall the platform and agents.  If not present the content in the passed datavolume will be utilized.  |
+| Environmental Variable        | Notes                                                                           |
+| ----------------------        | ------------------------------------------------------------------------------- |
+| PLATFORM_CONFIG=path        | Location of the platform configuration file to add agents during startup and setup the platform runtime.|
+| REINITIALIZE=1           | If present the start up of the platform will always reinstall the platform and agents.  If not present the content in the passed datavolume will be utilized.  |
 
 
 ## Minimal Execution
@@ -81,6 +81,7 @@ Initialization of the platform requires getting information to the docker contai
 volttron can be created.  To do this a second mount point is specified using the flags ```-v $PWD/example/config:/config```.
 This will mount the contents on the host at $PWD/examples/config to the point inside the container /config.  The 
 environmental variable ```-e 'PLATFORM_CONFIG=/config/example_platform_config.yml'``` informs the volttron container where its configuration file for the platform is located.  Note that this is from the containers perspective not the host.
+In addition ```-e REINITIALIZE=1``` will reinitialize both the platform and the volttron installed inside the container.
 
 ```bash
 # Starts a volttron persisting volttron home.
