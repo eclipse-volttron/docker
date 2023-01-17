@@ -23,12 +23,9 @@ value ```VAL```
 
 | Environmental Variable | Notes                                                                           |
 | ---------------------- | ------------------------------------------------------------------------------- |
-| PLATFORM_CONFIG        | Location of the platform configuration file to add agents during startup and    |
-|                        | setup the platform runtime.                                                     |
-|------------------------| --------------------------------------------------------------------------------|
-| REINITIALIZE           | If present the start up of the platform will always reinstall the platform and  | 
-|                        | agents.  If not present the content in the passed datavolume will be utilized.  |
-|------------------------| --------------------------------------------------------------------------------|
+| PLATFORM_CONFIG        | Location of the platform configuration file to add agents during startup and setup the platform runtime.|
+| REINITIALIZE           | If present the start up of the platform will always reinstall the platform and agents.  If not present the content in the passed datavolume will be utilized.  |
+
 
 ## Minimal Execution
 
