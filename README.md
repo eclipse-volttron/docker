@@ -7,12 +7,11 @@ available for changing behaviour and the assumptions that have been made in deve
 
 ## Prerequisites
 
-The following requires docker to be available through the command line and sudo to be available for removing
-datavolumes.
+The following requires docker to be available through the command line and sudo to be available if you need to mount/remove datavolumes to persist files on host machine.
 
 Clone this repository ```git clone https://github.com/eclipse-volttron/docker``` and ```cd docker```.
 
-It is assumed that you are executing from a shell within the docker directory for the rest of this README.
+It is assumed that you are executing from a shell within the cloned docker directory for the rest of this README.
 
 
 ## Environmental Variables
@@ -29,7 +28,7 @@ value ```VAL```
 
 ## Minimal Execution
 
-A volttron is able to be executed directly from docker.  This will create a running volttron, but will not
+This setup is to run a VOLTTRON instance directly from docker.  This will create a running volttron, but will not
 persist on the host after the container stops.
 
 ```bash
@@ -38,7 +37,7 @@ docker run -d --name volttron --rm -it eclipsevolttron/volttron:v10
 ```
 
 ```bash
-# View the logs add --follow to keep the logs outputing.
+# View the logs. add --follow to keep the logs outputing.
 docker logs volttron
 ```
 
@@ -48,9 +47,10 @@ docker exec --user volttron -it volttron vctl status
 ```
 
 ```bash
-# creates a bash shell inside the container.
+# creates a bash shell inside the container. 
 docker exec --user volttron -it volttron bash
 
+# Now you are in the docker container and can run any volttron commands/restart volttron
 vctl status
 
 vctl install volttron-listener
@@ -62,10 +62,11 @@ vctl shutdown --platform
 
 ## Persisting the VOLTTRON data 
 
-Creating a datavolume allows a container to maintain its state over restarting.  The
-volttron container stores it's state in a directory /home/volttron/datavolume.  
+Creating a datavolume allows a container to maintain its state over docker container restarts.  The
+volttron container stores it's state in a directory /home/volttron/datavolume within the docker container. 
+This directory can be mounted on the host by adding a -v option to the ```docker run``` command. 
 
-This first command will create a directory on the host called $PWD/datavolume (if it doesn't exist)
+The command below will create a directory on the host called $PWD/datavolume (if it doesn't exist)
 and will use it for maintaining a VOLTTRON_HOME and a virtual environment that is used inside the container.
 
 ```bash
@@ -77,11 +78,11 @@ docker run -d -v $PWD/datavolume:/home/volttron/datavolume \
 
 ## Initialization of Platform
 
-Initialization of the platform requires getting information to the docker container so that the
-volttron can be created.  To do this a second mount point is specified using the flags ```-v $PWD/example/config:/config```.
+Initialization of the platform requires getting platform and agent configurations to the docker container so that 
+VOLTTRON can be configured with it.  To do this a second mount point is specified using the flags ```-v $PWD/example/config:/config```.
 This will mount the contents on the host at $PWD/examples/config to the point inside the container /config.  The 
 environmental variable ```-e 'PLATFORM_CONFIG=/config/example_platform_config.yml'``` informs the volttron container where its configuration file for the platform is located.  Note that this is from the containers perspective not the host.
-In addition ```-e REINITIALIZE=1``` will reinitialize both the platform and the volttron installed inside the container.
+In addition ```-e REINITIALIZE=1``` will remove existing volttron and agents inside the container and reinitialize volttron with a clean volttron home.
 
 ```bash
 # Starts a volttron persisting volttron home.
@@ -91,8 +92,7 @@ docker run -d -v $PWD/example/config:/config \
     --name volttron --rm -it eclipsevolttron/volttron:v10
 ```
 
-Once executing the above command monitor the logs via ```docker logs volttron``` or through another monitoring tool such as docker desktop or podman.  In addition
-the docker logs are located in ```/home/volttron/datavolume/volttron_home/volttron.log".
+Once the above command is run, you can monitor the logs via ```docker logs volttron``` or through another monitoring tool such as docker desktop or podman. Docker logs are located in ```/home/volttron/datavolume/volttron_home/volttron.log".
 
 
 ## Platform Config Structure
