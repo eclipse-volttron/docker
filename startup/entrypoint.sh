@@ -1,4 +1,3 @@
-#!/bin/bash
 
 set -eu
 
@@ -40,7 +39,7 @@ then
 fi
 
 
-if [ ! $@ ] 
+if [ ! $@ ]
 then
     exec runuser -u volttron -- volttron -v
 else
